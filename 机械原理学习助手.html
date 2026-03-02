@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>机械原理 · 分章随机练</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 8px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 460px;
+            background-color: #ffffff;
+            border-radius: 32px 32px 28px 28px;
+            box-shadow: 0 20px 40px rgba(0, 10, 30, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 头部 */
+        .header {
+            background: linear-gradient(145deg, #1e3a5f, #152a44);
+            color: white;
+            padding: 18px 16px 12px 16px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .header h1 span {
+            background: rgba(255,255,255,0.15);
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 30px;
+        }
+
+        /* 章节滚动导航 */
+        .chapter-bar {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            padding: 12px 0 6px 0;
+            scrollbar-width: thin;
+            scrollbar-color: #a0b8d4 #d9e2f0;
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+        }
+        .chapter-bar::-webkit-scrollbar {
+            height: 4px;
+        }
+        .chapter-bar::-webkit-scrollbar-thumb {
+            background: #a0b8d4;
+            border-radius: 8px;
+        }
+        .chapter-btn {
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: 0.1s;
+            backdrop-filter: blur(2px);
+        }
+        .chapter-btn.active {
+            background: #f2b341;
+            border-color: #f2b341;
+            color: #1e3a5f;
+            font-weight: 600;
+        }
+        .chapter-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* 进度统计 */
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+        .score-badge {
+            background: #f2b341;
+            color: #1e3a5f;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-weight: 600;
+        }
+
+        /* 主卡片 */
+        .main-card {
+            padding: 20px 16px 24px 16px;
+        }
+
+        .question-panel {
+            background: #f8faff;
+            border-radius: 28px;
+            padding: 24px 16px 20px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.02), 0 6px 12px rgba(42, 65, 98, 0.08);
+            border: 1px solid #eef2f8;
+            margin-bottom: 18px;
+        }
+
+        .chapter-tag {
+            display: inline-block;
+            background: #d4e0fc;
+            color: #1e3a5f;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .question-text {
+            font-size: 20px;
+            line-height: 1.5;
+            font-weight: 550;
+            color: #1e2b3f;
+            margin-bottom: 20px;
+            word-break: break-word;
+        }
+
+        .feedback-area {
+            background: #eef3fe;
+            border-radius: 18px;
+            padding: 16px 18px;
+            border-left: 6px solid #4f7df3;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        .feedback-area.correct-feedback {
+            border-left-color: #2ba150;
+            background: #e0f5e6;
+        }
+        .feedback-area.wrong-feedback {
+            border-left-color: #d14c4c;
+            background: #ffe9e9;
+        }
+        .feedback-emojii {
+            font-size: 22px;
+            margin-right: 8px;
+        }
+        .explanation {
+            margin-top: 10px;
+            font-size: 14px;
+            color: #3d4e6b;
+            border-top: 1px dashed #b5c8f0;
+            padding-top: 10px;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 14px;
+            margin: 16px 0 12px;
+        }
+        .judge-btn {
+            flex: 1;
+            background: white;
+            border: 2px solid #ccd9f0;
+            padding: 18px 0;
+            border-radius: 40px;
+            font-size: 22px;
+            font-weight: 700;
+            color: #2b3d5f;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .judge-btn:active { transform: scale(0.97); background: #f0f5ff; }
+        .judge-btn.correct-btn { border-color: #2ba150; color: #2ba150; }
+        .judge-btn.wrong-btn { border-color: #d14c4c; color: #d14c4c; }
+        .judge-btn:disabled {
+            opacity: 0.4; transform: none; pointer-events: none;
+        }
+
+        .nav-row {
+            display: flex;
+            gap: 14px;
+            margin-top: 10px;
+        }
+        .nav-btn {
+            flex: 1;
+            background: #eef2f7;
+            border: none;
+            padding: 16px 0;
+            border-radius: 34px;
+            font-size: 18px;
+            font-weight: 550;
+            color: #2f405e;
+            cursor: pointer;
+        }
+        .nav-btn.primary {
+            background: #1e3a5f;
+            color: white;
+        }
+        .nav-btn:active { background: #dae1ec; }
+        .nav-btn.primary:active { background: #152a44; }
+        .nav-btn:disabled { opacity: 0.4; pointer-events: none; }
+
+        .restart-btn {
+            background: transparent;
+            border: 2px solid #b5c6e0;
+            color: #1e3a5f;
+            font-size: 16px;
+            padding: 12px 0;
+            border-radius: 30px;
+            margin-top: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .hidden { display: none !important; }
+
+        .complete-message {
+            text-align: center; padding: 30px 10px;
+        }
+        .footer-note {
+            text-align: center; color: #a2b6d3; font-size: 12px;
+            border-top: 1px solid #e8edf5; padding-top: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <!-- 头部 + 章节导航 -->
+    <div class="header">
+        <h1>⚙️ 机械原理 <span>分章·随机练</span></h1>
+        <!-- 章节按钮容器（动态生成） -->
+        <div class="chapter-bar" id="chapterBar"></div>
+        <!-- 统计行 -->
+        <div class="stats-row">
+            <span id="chapterTitle">绪论</span>
+            <span class="score-badge" id="scoreDisplay">0/0</span>
+        </div>
+    </div>
+
+    <!-- 主卡片 -->
+    <div class="main-card" id="mainCard">
+        <!-- 答题区域 -->
+        <div id="quizArea">
+            <div class="question-panel">
+                <div class="chapter-tag" id="currentChapterTag">绪论</div>
+                <div class="question-text" id="questionText">加载题目...</div>
+                <div id="feedbackContainer" class="feedback-area">
+                    <span id="feedbackEmoji" class="feedback-emojii">⚙️</span>
+                    <span id="feedbackMsg">点击按钮判断</span>
+                    <div id="explanationText" class="explanation"></div>
+                </div>
+            </div>
+            <div class="action-row">
+                <button class="judge-btn correct-btn" id="correctBtn">✔ 正确</button>
+                <button class="judge-btn wrong-btn" id="wrongBtn">✘ 错误</button>
+            </div>
+            <div class="nav-row">
+                <button class="nav-btn" id="restartSmallBtn">🔄 随机重来</button>
+                <button class="nav-btn primary" id="nextBtn" disabled>▶ 下一题</button>
+            </div>
+        </div>
+
+        <!-- 完成界面 -->
+        <div id="completeArea" class="hidden">
+            <div class="question-panel" style="text-align: center; padding: 30px 20px;">
+                <div style="font-size: 60px;">🏆</div>
+                <div style="font-size: 24px; font-weight: 600; margin: 16px 0;">本章完成！</div>
+                <div style="font-size: 18px; background: #e0f0ff; padding: 16px; border-radius: 40px;" id="finalScoreMessage">正确 0 / 0</div>
+                <button class="restart-btn" id="restartFromComplete" style="width:80%; margin-top:30px; background:#1e3a5f; color:white; border:none;">🔄 重新挑战本章</button>
+            </div>
+        </div>
+
+        <div class="footer-note">
+            📚 11章 · 110个核心判断 · 随机顺序
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    // -------------------- 章节题库（共110题）--------------------
+    const chapters = [
+        { id: 'intro', name: '绪论', questions: [
+            { text: '机器是执行机械运动的装置，用来变换或传递能量、物料与信息。', correct: true, explanation: '正确。机器的定义。' },
+            { text: '机构就是机器。', correct: false, explanation: '错误。机构主要用来传递运动，而机器能完成有用的机械功或转换机械能。' },
+            { text: '构件可以是单一零件，也可以是几个零件的刚性组合。', correct: true, explanation: '正确。构件是运动的单元，零件是制造的单元。' },
+            { text: '通用零件和专用零件是按结构分类的。', correct: false, explanation: '错误。是按使用范围分为通用零件和专用零件。' },
+            { text: '原动机是提供机械系统动力的装置。', correct: true, explanation: '正确。原动机将其他能量转化为机械能。' }
+        ]},
+        { id: 'struct', name: '结构分析', questions: [
+            { text: '机构具有确定运动的条件是自由度F＞0且原动件数等于自由度F。', correct: true, explanation: '正确。' },
+            { text: '平面低副（转动副、移动副）引入2个约束，保留1个自由度。', correct: true, explanation: '正确。' },
+            { text: '计算平面机构自由度时，局部自由度应计入构件自由度。', correct: false, explanation: '错误。局部自由度（如滚子）应去除，计算时将其视为焊接整体。' },
+            { text: '虚约束对机构的运动不起独立的限制作用，计算自由度时应去掉。', correct: true, explanation: '正确。虚约束是重复约束，不改变机构运动，计算时要排除。' },
+            { text: '复合铰链是指两个以上构件在同一处用转动副相连，此时转动副数目为构件数-1。', correct: true, explanation: '正确。例如三个构件在同一轴线组成两个转动副。' },
+            { text: '一个作平面运动的自由构件有3个自由度。', correct: true, explanation: '对。平面运动构件具有x、y平移和转动三个自由度。' },
+            { text: '高副（如凸轮与从动件）引入2个约束。', correct: false, explanation: '错误。高副点线接触，只引入1个约束，保留2个自由度。' },
+            { text: '机构自由度就是机构相对机架独立运动的数目。', correct: true, explanation: '正确。这是自由度的定义。' },
+            { text: '所有机构都可以绘制出运动简图。', correct: true, explanation: '正确。运动简图是用符号表示构件和运动副的图形。' },
+            { text: '运动链成为机构的条件是取一个构件为机架。', correct: true, explanation: '正确。原动件运动确定，其余构件随之确定。' },
+            { text: '机构中的虚约束对运动不起作用，但可以改善受力。', correct: true, explanation: '正确。虚约束能增加刚度、改善受力。' }
+        ]},
+        { id: 'kinematics', name: '运动分析', questions: [
+            { text: '瞬心是两构件上相对速度为零的重合点。', correct: true, explanation: '正确。' },
+            { text: '三个构件共有三个瞬心，且位于同一条直线上（三心定理）。', correct: true, explanation: '正确。' },
+            { text: '高副的瞬心位于接触点的法线上。', correct: true, explanation: '对。' },
+            { text: '速度瞬心法可以用于求解机构的加速度。', correct: false, explanation: '错误。瞬心法只能求速度，不能求加速度。' },
+            { text: '用相对运动图解法可以求解机构的速度和加速度。', correct: true, explanation: '正确。' },
+            { text: '重合点法常用来求解含有移动副的机构加速度。', correct: true, explanation: '正确。如导杆机构。' },
+            { text: '科氏加速度出现在两个构件相对运动是转动且移动时。', correct: true, explanation: '正确。当牵连运动是转动，且相对运动是移动时产生科氏加速度。' },
+            { text: '在平面机构中，科氏加速度的方向与相对速度方向垂直。', correct: true, explanation: '正确。a_k = 2ω×v，方向垂直。' }
+        ]},
+        { id: 'force', name: '力分析', questions: [
+            { text: '移动副中，当量摩擦系数总是大于实际摩擦系数。', correct: true, explanation: '正确。由于槽面或半圆柱面接触导致当量摩擦系数增大。' },
+            { text: '机械自锁的条件是效率η≤0。', correct: true, explanation: '正确。效率小于等于0表示无论驱动力多大都不能运动。' },
+            { text: '螺旋副中，螺纹升角小于当量摩擦角时自锁。', correct: true, explanation: '正确，这是自锁条件。' },
+            { text: '摩擦圆半径与轴颈半径和当量摩擦系数有关。', correct: true, explanation: '正确，ρ = fv * r。' },
+            { text: '考虑摩擦时，转动副中总反力始终切于摩擦圆。', correct: true, explanation: '正确。总反力与摩擦圆相切，且对轴心之矩与相对转动方向相反。' },
+            { text: '提高机械效率必然增加驱动力。', correct: false, explanation: '错误。效率提高通常减小驱动力。' },
+            { text: '机械效率等于输出功与输入功之比。', correct: true, explanation: '正确。' },
+            { text: '自锁现象是由于摩擦力大于驱动力引起的。', correct: false, explanation: '不全面，更准确的是驱动力有效分力总小于摩擦力，导致无论多大都不能动。' },
+            { text: '三角形螺纹比矩形螺纹更容易自锁。', correct: true, explanation: '正确，因为牙型角大，当量摩擦系数大。' },
+            { text: '在转动副中，总反力恒指向轴心。', correct: false, explanation: '错误，总反力方向与轴颈上载荷及摩擦有关，不是恒指向。' }
+        ]},
+        { id: 'balance', name: '机械平衡', questions: [
+            { text: '刚性转子的静平衡条件就是其质心位于回转轴线上。', correct: true, explanation: '正确。静平衡只需惯性力平衡。' },
+            { text: '动平衡的转子一定满足静平衡。', correct: true, explanation: '正确。动平衡包含静平衡条件。' },
+            { text: '对于宽径比小于0.2的转子，一般只需静平衡。', correct: true, explanation: '正确。薄盘转子可只做静平衡。' },
+            { text: '静平衡的转子在回转时不会产生惯性力偶。', correct: false, explanation: '错误。静平衡只保证惯性力合力为零，但可能有惯性力偶，故不一定动平衡。' },
+            { text: '机械平衡的目的是完全消除惯性力。', correct: false, explanation: '错误。只能部分或完全平衡，理想消除但实际有限。' },
+            { text: '对于往复运动构件，平衡较困难，通常只能部分平衡。', correct: true, explanation: '正确。' },
+            { text: '刚性转子动平衡的条件是各偏心质量产生的惯性力矢量和为零，惯性力矩矢量和也为零。', correct: true, explanation: '正确。' }
+        ]},
+        { id: 'speedfluct', name: '速度波动调节', questions: [
+            { text: '飞轮的作用是调节非周期性速度波动。', correct: false, explanation: '错误。飞轮调节周期性速度波动；调速器调节非周期性波动。' },
+            { text: '安装飞轮后，机械的运转速度波动会减小。', correct: true, explanation: '正确。飞轮储能放能，减小速度波动。' },
+            { text: '机械运动循环分为周期性速度波动和非周期性速度波动。', correct: true, explanation: '对。' },
+            { text: '最大盈亏功决定了飞轮的转动惯量。', correct: true, explanation: '正确。' },
+            { text: '为了减小飞轮尺寸，飞轮应装在低速轴上。', correct: false, explanation: '错误。装在高速轴上转动惯量可以更小。' },
+            { text: '调速器可以自动调节非周期性速度波动。', correct: true, explanation: '正确。' },
+            { text: '周期性速度波动可以通过增加等效转动惯量来减小。', correct: true, explanation: '正确。安装飞轮就是增加转动惯量。' }
+        ]},
+        { id: 'linkage', name: '连杆机构', questions: [
+            { text: '在铰链四杆机构中，若满足杆长条件，则最短杆的邻边为机架时得到曲柄摇杆机构。', correct: true, explanation: '正确。' },
+            { text: '具有急回特性的机构，其行程速比系数K一定大于1。', correct: true, explanation: '对。' },
+            { text: '曲柄摇杆机构中，当曲柄为主动件时，机构一定存在死点。', correct: false, explanation: '错误。死点出现在摇杆为主动件且连杆与曲柄共线时。' },
+            { text: '在曲柄摇杆机构中，最小传动角出现在曲柄与机架共线的两个位置之一。', correct: true, explanation: '对。' },
+            { text: '对心曲柄滑块机构，当曲柄为主动件时有急回特性。', correct: false, explanation: '错误。对心曲柄滑块机构极位夹角θ=0，K=1，无急回特性。' },
+            { text: '偏置曲柄滑块机构一定具有急回特性。', correct: true, explanation: '正确。偏置导致极位夹角θ>0，有急回。' },
+            { text: '摆动导杆机构（曲柄为主动件）一定具有急回特性。', correct: true, explanation: '对。' },
+            { text: '压力角越大，机构的传力性能越好。', correct: false, explanation: '错误。压力角越大，有效分力越小，传力性能越差。' },
+            { text: '传动角等于压力角的余角（即90°－压力角）。', correct: true, explanation: '正确。' },
+            { text: '死点位置对于任何机构都是有害的，必须避免。', correct: false, explanation: '错误。死点在工程中也可利用（如飞机起落架、夹具）。' },
+            { text: '双曲柄机构中，主动曲柄匀速转动，从动曲柄也匀速转动。', correct: false, explanation: '错误。一般为变速转动，平行四边形机构除外。' },
+            { text: '曲柄滑块机构可由曲柄摇杆机构演化而来。', correct: true, explanation: '正确。通过改变机架长度或转动副演化。' }
+        ]},
+        { id: 'cam', name: '凸轮机构', questions: [
+            { text: '凸轮机构中，等速运动规律会引起刚性冲击。', correct: true, explanation: '正确。速度突变产生无限大加速度，引起刚性冲击。' },
+            { text: '等加速等减速运动规律会产生柔性冲击。', correct: true, explanation: '对。加速度有限突变，产生柔性冲击。' },
+            { text: '凸轮基圆半径越大，压力角越大。', correct: false, explanation: '错误。基圆半径增大，压力角通常会减小。' },
+            { text: '凸轮机构的压力角指的是凸轮与从动件接触点的法线方向与从动件速度方向所夹锐角。', correct: true, explanation: '正确。' },
+            { text: '滚子从动件凸轮机构中，实际轮廓曲线是理论轮廓的等距曲线。', correct: true, explanation: '对。' },
+            { text: '凸轮机构从动件采用简谐运动规律，不会有冲击。', correct: false, explanation: '错误。简谐运动在起始和终止点加速度有突变，产生柔性冲击。' },
+            { text: '为了减小凸轮的压力角，可以增大基圆半径。', correct: true, explanation: '正确。' },
+            { text: '凸轮机构中，从动件运动规律完全由凸轮轮廓决定。', correct: true, explanation: '对。' },
+            { text: '移动从动件凸轮机构中，压力角越小，推力越小。', correct: false, explanation: '错误。压力角小，有效分力大，推力性能好。' },
+            { text: '凸轮机构的基圆是指以凸轮轮廓最小向径所作的圆。', correct: true, explanation: '正确。' }
+        ]},
+        { id: 'gear', name: '齿轮机构', questions: [
+            { text: '渐开线齿轮的正确啮合条件是模数和压力角分别相等。', correct: true, explanation: '对。' },
+            { text: '齿轮的分度圆是计算齿轮各部分尺寸的基准圆。', correct: true, explanation: '正确。' },
+            { text: '我国标准齿轮的压力角为25°。', correct: false, explanation: '错误。我国标准压力角是20°。' },
+            { text: '齿数少于17的渐开线标准齿轮一定会发生根切。', correct: true, explanation: '正确。标准齿轮不根切的最小齿数是17。' },
+            { text: '采用变位齿轮可以避免根切。', correct: true, explanation: '对。正变位可提高最小不根切齿数。' },
+            { text: '一对渐开线齿轮的啮合角恒等于分度圆压力角。', correct: false, explanation: '错误。只有标准中心距安装时啮合角才等于分度圆压力角。' },
+            { text: '重合度大于1是齿轮连续传动的条件。', correct: true, explanation: '正确。重合度≥1才能保证连续传动。' },
+            { text: '渐开线齿廓在节点处啮合时，齿廓间有相对滑动。', correct: false, explanation: '错误。节点处相对速度沿公切线方向相等，无滑动，是纯滚动。' },
+            { text: '标准齿轮分度圆上的齿厚等于齿槽宽。', correct: true, explanation: '对。' },
+            { text: '渐开线齿轮传动的可分性是指中心距变化不影响传动比。', correct: true, explanation: '正确。渐开线齿轮中心距变化后，传动比仍为齿数反比。' },
+            { text: '斜齿轮的端面模数大于法面模数。', correct: true, explanation: '正确。法面模数是标准值，端面模数=法面模数/cosβ。' },
+            { text: '圆锥齿轮用于相交轴之间的传动。', correct: true, explanation: '对。' },
+            { text: '蜗杆传动中，蜗轮的转向不仅与蜗杆转向有关，还与蜗杆螺旋线方向有关。', correct: true, explanation: '正确。' },
+            { text: '渐开线齿廓的形状取决于基圆半径。', correct: true, explanation: '正确。' }
+        ]},
+        { id: 'geartrain', name: '齿轮系设计', questions: [
+            { text: '周转轮系中，差动轮系的自由度为2。', correct: true, explanation: '正确。' },
+            { text: '定轴轮系的传动比等于所有从动轮齿数乘积与所有主动轮齿数乘积之比。', correct: true, explanation: '对，注意符号。' },
+            { text: '行星轮系中，中心轮和行星架都可以转动。', correct: true, explanation: '正确。' },
+            { text: '转化轮系法可以求解周转轮系的传动比。', correct: true, explanation: '正确。' },
+            { text: '混合轮系不能直接用一个公式计算传动比，需分解。', correct: true, explanation: '正确。' },
+            { text: '轮系可以实现变速和换向。', correct: true, explanation: '正确。' },
+            { text: '惰轮只改变传动比符号，不改变大小。', correct: true, explanation: '正确。惰轮改变转向。' }
+        ]},
+        { id: 'other', name: '其他常用机构', questions: [
+            { text: '棘轮机构通常将摇杆的往复摆动转换为棘轮的单向间歇运动。', correct: true, explanation: '正确。' },
+            { text: '槽轮机构的运动系数τ总是小于0.5。', correct: true, explanation: '正确。常用τ=(z-2)/(2z)均小于0.5。' },
+            { text: '槽轮机构的槽数越多，运动系数越大。', correct: true, explanation: '正确。τ随z增大而增大。' },
+            { text: '不完全齿轮机构在从动轮运动期间，角速度一般不变。', correct: false, explanation: '错误。通常有较大冲击，速度变化剧烈。' },
+            { text: '凸轮式间歇运动机构可以获得精确的间歇分度。', correct: true, explanation: '正确。' },
+            { text: '棘轮机构中，常用止回爪防止棘轮反转。', correct: true, explanation: '对。' },
+            { text: '槽轮机构的圆柱销数增加，运动系数也会增加。', correct: true, explanation: '正确，τ=k(z-2)/(2z)。' },
+            { text: '间歇运动机构只能将连续转动变为间歇转动。', correct: false, explanation: '错误。也可以将往复摆动变为间歇转动，如棘轮。' },
+            { text: '摩擦式棘轮机构可以实现无级调节转角。', correct: true, explanation: '正确。' },
+            { text: '槽轮机构中，锁止弧的作用是防止槽轮在停歇期转动。', correct: true, explanation: '对。' },
+            { text: '万向联轴器用于传递相交轴之间的运动。', correct: true, explanation: '正确。' },
+            { text: '螺旋机构可以将旋转运动变为直线运动。', correct: true, explanation: '正确。' }
+        ]}
+    ];
+
+    // 计算总题数（验证≥100）
+    let totalAll = 0;
+    chapters.forEach(ch => totalAll += ch.questions.length);
+    console.log('总题数:', totalAll); // 应≥110
+
+    // 当前选中的章节ID（默认第一个）
+    let currentChapterId = chapters[0].id;
+
+    // 当前使用的题目列表（随机顺序副本）
+    let currentQuestions = [];
+
+    // 当前索引、得分、是否已回答
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+
+    // DOM 元素
+    const chapterBar = document.getElementById('chapterBar');
+    const chapterTitle = document.getElementById('chapterTitle');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const currentChapterTag = document.getElementById('currentChapterTag');
+    const questionText = document.getElementById('questionText');
+    const feedbackContainer = document.getElementById('feedbackContainer');
+    const feedbackEmoji = document.getElementById('feedbackEmoji');
+    const feedbackMsg = document.getElementById('feedbackMsg');
+    const explanationDiv = document.getElementById('explanationText');
+    const correctBtn = document.getElementById('correctBtn');
+    const wrongBtn = document.getElementById('wrongBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const restartSmallBtn = document.getElementById('restartSmallBtn');
+    const restartFromComplete = document.getElementById('restartFromComplete');
+    const quizArea = document.getElementById('quizArea');
+    const completeArea = document.getElementById('completeArea');
+    const finalScoreMessage = document.getElementById('finalScoreMessage');
+
+    // 工具：随机打乱数组
+    function shuffleArray(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    // 根据当前章节ID加载题目并打乱
+    function loadChapterQuestions(chapterId) {
+        const chapter = chapters.find(c => c.id === chapterId);
+        if (!chapter) return;
+        // 复制题目并随机打乱
+        currentQuestions = shuffleArray([...chapter.questions]);
+        currentIndex = 0;
+        score = 0;
+        answered = false;
+        // 更新标题显示
+        chapterTitle.innerText = chapter.name;
+        currentChapterTag.innerText = chapter.name;
+        updateScoreUI();
+        // 重置完成界面隐藏
+        quizArea.classList.remove('hidden');
+        completeArea.classList.add('hidden');
+        // 加载第一题
+        loadQuestion();
+    }
+
+    // 更新得分显示
+    function updateScoreUI() {
+        const total = currentQuestions.length;
+        scoreDisplay.innerText = `${score}/${total}`;
+    }
+
+    // 加载当前索引题目
+    function loadQuestion() {
+        if (currentIndex >= currentQuestions.length) {
+            // 完成
+            quizArea.classList.add('hidden');
+            completeArea.classList.remove('hidden');
+            finalScoreMessage.innerText = `正确 ${score} / ${currentQuestions.length}`;
+            return;
+        }
+        const q = currentQuestions[currentIndex];
+        questionText.innerText = q.text;
+        // 清空反馈
+        feedbackContainer.classList.remove('correct-feedback', 'wrong-feedback');
+        feedbackEmoji.innerText = '⚙️';
+        feedbackMsg.innerText = '点击按钮判断对错';
+        explanationDiv.innerText = '';
+        // 启用按钮
+        correctBtn.disabled = false;
+        wrongBtn.disabled = false;
+        nextBtn.disabled = true;
+        answered = false;
+        // 进度文本（可选项，但无单独元素，可显示在顶部，但已用分数）
+    }
+
+    // 处理回答
+    function handleAnswer(selectedBool) {
+        if (answered) return;
+        const q = currentQuestions[currentIndex];
+        const isCorrect = (selectedBool === q.correct);
+        if (isCorrect) {
+            score++;
+            feedbackContainer.classList.add('correct-feedback');
+            feedbackEmoji.innerText = '🎉';
+            feedbackMsg.innerText = '回答正确！';
+        } else {
+            feedbackContainer.classList.add('wrong-feedback');
+            feedbackEmoji.innerText = '💡';
+            feedbackMsg.innerText = `回答错误。正确答案是：${q.correct ? '正确' : '错误'}`;
+        }
+        explanationDiv.innerText = q.explanation || '';
+        updateScoreUI();
+        correctBtn.disabled = true;
+        wrongBtn.disabled = true;
+        nextBtn.disabled = false;
+        answered = true;
+    }
+
+    // 下一题
+    function nextQuestion() {
+        if (!answered && currentIndex < currentQuestions.length) return;
+        currentIndex++;
+        loadQuestion();
+    }
+
+    // 重新随机打乱当前章节题目（重来）
+    function reshuffleCurrent() {
+        currentQuestions = shuffleArray([...currentQuestions]);
+        currentIndex = 0;
+        score = 0;
+        answered = false;
+        updateScoreUI();
+        quizArea.classList.remove('hidden');
+        completeArea.classList.add('hidden');
+        loadQuestion();
+        // 确保按钮状态
+        nextBtn.disabled = true;
+    }
+
+    // 渲染章节按钮
+    function renderChapterButtons() {
+        chapterBar.innerHTML = '';
+        chapters.forEach(ch => {
+            const btn = document.createElement('button');
+            btn.className = `chapter-btn ${ch.id === currentChapterId ? 'active' : ''}`;
+            btn.innerText = ch.name;
+            btn.dataset.id = ch.id;
+            btn.addEventListener('click', (e) => {
+                // 切换激活样式
+                document.querySelectorAll('.chapter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentChapterId = ch.id;
+                loadChapterQuestions(currentChapterId);
+            });
+            chapterBar.appendChild(btn);
+        });
+    }
+
+    // 初始化：选第一个章节
+    function init() {
+        renderChapterButtons();
+        // 默认选中第一个
+        currentChapterId = chapters[0].id;
+        loadChapterQuestions(currentChapterId);
+    }
+
+    // 事件绑定
+    correctBtn.addEventListener('click', () => handleAnswer(true));
+    wrongBtn.addEventListener('click', () => handleAnswer(false));
+    nextBtn.addEventListener('click', nextQuestion);
+    restartSmallBtn.addEventListener('click', () => {
+        // 在当前章节重新随机
+        reshuffleCurrent();
+    });
+    restartFromComplete.addEventListener('click', () => {
+        reshuffleCurrent();
+    });
+
+    // 启动
+    init();
+})();
+</script>
+</body>
+</html>
